@@ -14,6 +14,9 @@ const db = new sqlite3.Database(":memory:");
 
 const buildSchemas = require("./src/schemas");
 
+// implement winston
+const logger = require("./utils/winston");
+
 db.serialize(() => {
   buildSchemas(db);
 
@@ -32,6 +35,6 @@ db.serialize(() => {
   app.use(mdRouter);
 
   app.listen(port, () =>
-    console.log(`App started and listening on port ${port}`)
+    logger.info(`App started and listening on port ${port}`)
   );
 });
