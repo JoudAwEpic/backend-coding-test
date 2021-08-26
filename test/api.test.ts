@@ -1,15 +1,16 @@
-const request = require("supertest");
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
 
-const sqlite3 = require("sqlite3").verbose();
+import request from "supertest";
 
-const db = new sqlite3.Database(":memory:");
+import sqlite3 from "sqlite3";
 
-const app = require("../src/app")(db);
+import app from "../src/app";
 
-const buildSchemas = require("../src/schemas");
+import buildSchemas from "../src/schemas";
 
 // get testing data
-const {
+import {
   ride,
   errorRiderName,
   errorDriverName,
@@ -17,24 +18,32 @@ const {
   errorStartLat,
   errorStartLong,
   errorEndLatitude,
-} = require("../data/rides");
+} from "../data/rides";
+
+sqlite3.verbose();
+
+const db = new sqlite3.Database(":memory:");
+
+app(db);
 
 describe("API tests", () => {
   before((done) => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     db.serialize((err) => {
       if (err) {
-        return done(err);
+        return err;
       }
 
       buildSchemas(db);
-
       return done();
     });
   });
 
   describe("GET /rides", () => {
     it("throw an error when no value returned", (done) => {
-      request(app).get("/rides").expect(500, done);
+      request(app).get("/rides").expect(500);
+      return done();
     });
     it("should return all records", (done) => {
       request(app)
@@ -42,8 +51,9 @@ describe("API tests", () => {
         .send(ride)
         .expect(200)
         .end((err) => {
-          if (!err) request(app).get("/rides").expect(200, done);
+          if (!err) request(app).get("/rides").expect(200);
         });
+      return done();
     });
   });
 
@@ -53,30 +63,37 @@ describe("API tests", () => {
         .post("/rides")
         .send(ride)
         .expect("Content-Type", "application/json; charset=utf-8")
-        .expect(200, done);
+        .expect(200);
+      return done();
     });
     it("should throw an error when rider_name is missing", (done) => {
-      request(app).post("/rides").send(errorRiderName).expect(400, done);
+      request(app).post("/rides").send(errorRiderName).expect(400);
+      return done();
     });
 
     it("should throw an error when driver_name is missing", (done) => {
-      request(app).post("/rides").send(errorDriverName).expect(400, done);
+      request(app).post("/rides").send(errorDriverName).expect(400);
+      return done();
     });
 
     it("should throw an error when driver_vehicle is missing", (done) => {
-      request(app).post("/rides").send(errorDriverVehicle).expect(400, done);
+      request(app).post("/rides").send(errorDriverVehicle).expect(400);
+      return done();
     });
 
     it("should throw an error when startLatitude is not in the right range", (done) => {
-      request(app).post("/rides").send(errorStartLat).expect(400, done);
+      request(app).post("/rides").send(errorStartLat).expect(400);
+      return done();
     });
 
     it("should throw an error when startLongitude is not in the right range", (done) => {
-      request(app).post("/rides").send(errorStartLong).expect(400, done);
+      request(app).post("/rides").send(errorStartLong).expect(400);
+      return done();
     });
 
     it("should throw an error when endLatitude is not in the right range", (done) => {
-      request(app).post("/rides").send(errorEndLatitude).expect(400, done);
+      request(app).post("/rides").send(errorEndLatitude).expect(400);
+      return done();
     });
   });
 
@@ -87,20 +104,20 @@ describe("API tests", () => {
         .send(ride)
         .expect(200)
         .end((err) => {
-          if (!err) request(app).get(`/rides/1`).expect(200, done);
+          if (!err) request(app).get(`/rides/1`).expect(200);
         });
+      return done();
     });
     it("should throw an error when no record found", (done) => {
-      request(app).get("/rides/1231141321").expect(404, done);
+      request(app).get("/rides/1231141321").expect(404);
+      return done();
     });
   });
 
   describe("GET /health", () => {
     it("should return health", (done) => {
-      request(app)
-        .get("/health")
-        .expect("Content-Type", /text/)
-        .expect(200, done);
+      request(app).get("/health").expect("Content-Type", /text/).expect(200);
+      return done();
     });
   });
 });

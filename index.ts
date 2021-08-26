@@ -1,21 +1,26 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
+
 // express md to handle markup files
-const expressMd = require("express-md");
+import expressMd from "express-md";
 
-const sqlite3 = require("sqlite3").verbose();
+// import and init the sqlite3
+import * as sqlite3 from "sqlite3";
 
-const path = require("path");
+import path from "path";
 
 // initial the app requirement
-const application = require("./src/app");
+import application from "./src/app";
+
+import buildSchemas from "./src/schemas";
+
+// implement winston
+import logger from "./utils/winston";
 
 const port = 8010;
 
+sqlite3.verbose();
 const db = new sqlite3.Database(":memory:");
-
-const buildSchemas = require("./src/schemas");
-
-// implement winston
-const logger = require("./utils/winston");
 
 db.serialize(() => {
   buildSchemas(db);

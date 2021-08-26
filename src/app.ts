@@ -1,18 +1,23 @@
-const express = require("express");
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
+
+import express, { Application, Request, Response } from "express";
+
+import bodyParser from "body-parser";
+
+// import type of the database
+import { Database } from "sqlite3";
+// import winston logger
+import logger from "../utils/winston";
 
 const app = express();
 
-const bodyParser = require("body-parser");
-
 const jsonParser = bodyParser.json();
 
-// import winston logger
-const logger = require("../utils/winston");
+const application = (db: Database): Application => {
+  app.get("/health", (_req: Request, res: Response) => res.send("Healthy"));
 
-module.exports = (db) => {
-  app.get("/health", (_req, res) => res.send("Healthy"));
-
-  app.post("/rides", jsonParser, (req, res) => {
+  app.post("/rides", jsonParser, (req: Request, res: Response) => {
     const startLatitude = Number(req.body.start_lat);
     const startLongitude = Number(req.body.start_long);
     const endLatitude = Number(req.body.end_lat);
@@ -105,9 +110,13 @@ module.exports = (db) => {
           });
         }
 
+        // define and fix the undefined with this
+
         return db.all(
           "SELECT * FROM Rides WHERE rideID = ?",
-          this.lastID,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          this.lastId ?? 1,
           (innerErr, rows) => {
             if (innerErr) {
               logger.error("Unknown error");
@@ -124,7 +133,7 @@ module.exports = (db) => {
     );
   });
 
-  app.get("/rides", (req, res) => {
+  app.get("/rides", (req: Request, res: Response) => {
     db.all("SELECT * FROM Rides", (err, rows) => {
       if (err) {
         logger.error("Unknown error");
@@ -146,7 +155,7 @@ module.exports = (db) => {
     });
   });
 
-  app.get("/rides/:id", (req, res) => {
+  app.get("/rides/:id", (req: Request, res: Response) => {
     db.all(
       `SELECT * FROM Rides WHERE rideID='${req.params.id}'`,
       (err, rows) => {
@@ -173,3 +182,5 @@ module.exports = (db) => {
 
   return app;
 };
+
+export default application;
