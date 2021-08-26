@@ -134,25 +134,51 @@ const application = (db: Database): Application => {
   });
 
   app.get("/rides", (req: Request, res: Response) => {
-    db.all("SELECT * FROM Rides", (err, rows) => {
-      if (err) {
-        logger.error("Unknown error");
-        return res.status(500).send({
-          error_code: "SERVER_ERROR",
-          message: "Unknown error",
-        });
-      }
+    const page = +req.query.page || 1;
+    const limit = +req.query.limit || 5;
 
-      if (rows.length === 0) {
-        logger.error("Could not find any rides");
-        return res.status(500).send({
-          error_code: "RIDES_NOT_FOUND_ERROR",
-          message: "Could not find any rides",
-        });
-      }
+    db.all(
+      `SELECT * FROM Rides LIMIT '${limit}' OFFSET '${limit * page}'`,
+      (err, rows) => {
+        if (err) {
+          logger.error("Unknown error");
+          return res.status(500).send({
+            error_code: "SERVER_ERROR",
+            message: "Unknown error",
+          });
+        }
 
-      return res.send(rows);
-    });
+        if (rows.length === 0) {
+          logger.error("Could not find any rides");
+          return res.status(500).send({
+            error_code: "RIDES_NOT_FOUND_ERROR",
+            message: "Could not find any rides",
+          });
+        }
+
+        return db.all(
+          "SELECT COUNT(rideID) AS countRides FROM Rides",
+          (innerErr, rides: unknown) => {
+            if (innerErr) {
+              logger.error("Unknown error");
+              return res.status(500).send({
+                error_code: "SERVER_ERROR",
+                message: "Unknown error",
+              });
+            }
+
+            const nextPage = page * limit < rides[0].countRides;
+
+            return res.send({
+              rows,
+              total_items: rides[0].countRides,
+              next_page: nextPage,
+              page,
+            });
+          }
+        );
+      }
+    );
   });
 
   app.get("/rides/:id", (req: Request, res: Response) => {

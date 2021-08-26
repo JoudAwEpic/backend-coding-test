@@ -45,8 +45,14 @@ the server contains from three main endpoint that are used to fetch:
 action: return a list of records **"rides"**
 
 ```json
-curl GET '${{server.url}}/rides'
+curl GET '${{server.url}}/rides?page=number&limit=number'
 ```
+
+where:
+
+**page** is the number of page we are in
+
+**limit** is the number of records you want to show per page
 
 expected returned data:
 
@@ -57,7 +63,7 @@ request can contain two return data types:
 return **rows** that contains all data of the rides in the database in the following formats
 
 ```json
-[
+rows: [
     {
         rideID: 1,
         startLat: 38.8951,
@@ -70,7 +76,10 @@ return **rows** that contains all data of the rides in the database in the follo
         created: 1629891080
     },
     {...},
-]
+],
+total_items: 10,
+next_page: true,
+page: 1
 ```
 
 #### error:

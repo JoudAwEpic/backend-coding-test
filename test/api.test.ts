@@ -45,7 +45,7 @@ describe("API tests", () => {
       request(app).get("/rides").expect(500);
       return done();
     });
-    it("should return all records", (done) => {
+    it("should return records", (done) => {
       request(app)
         .post("/rides")
         .send(ride)
@@ -53,6 +53,14 @@ describe("API tests", () => {
         .end((err) => {
           if (!err) request(app).get("/rides").expect(200);
         });
+      return done();
+    });
+    it("should work with pagination", (done) => {
+      request(app).post("/rides").send(ride).expect(200);
+      request(app).post("/rides").send(ride).expect(200);
+      request(app).get(`/rides?page=1&limit=1`).expect(200);
+      request(app).get(`/rides?page=2&limit=1`).expect(200);
+
       return done();
     });
   });

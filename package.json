@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "nyc mocha",
+    "test": "tsc && nyc mocha",
     "start": "ts-node-dev index.ts",
     "lint": "eslint . --ext .ts"
   },
