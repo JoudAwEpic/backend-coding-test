@@ -109,6 +109,9 @@ describe("API tests", () => {
     it("should throw an error when no record found", async () => {
       await request(app).get("/rides/1231141321").expect(404);
     });
+    it("should throw an error when providing a string as an id", async () => {
+      await request(app).get("/rides/sadasdasdas").expect(404);
+    });
   });
 
   describe("GET /health", () => {

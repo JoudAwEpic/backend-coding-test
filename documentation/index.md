@@ -14,7 +14,17 @@ the project can be defined in 6 main points:
 5. [Security]
 6. [Load Testing]
 
-project is meant to be handling a single SQL table that is called "_Rides_" that represent as the name suggests a ride that starts from one point and ends at another point, with some metadata about the rider and the vehicle that is the ridding.
+## Setup
+
+1. pull the code using `git clone https://github.com/JoudAwEpic/backend-coding-test.git`
+2. cd `backend-coding-test`
+3. Run `npm install`
+4. Run `npm test`
+5. Run `npm start`
+
+## Database
+
+project is using sqllite3 for handling a single table that is called "Rides" that represent as the name suggests a ride that starts from one point and ends at another point, with some metadata about the rider and the vehicle that is the ridding.
 
 here is a brief about the database **Schema** :
 
@@ -60,7 +70,7 @@ request can contain two return data types:
 
 #### success:
 
-return **rows** that contains all data of the rides in the database in the following formats
+return **rows** that contains all data of the rides in the database in the following formats **(expected status code 200)**
 
 ```json
 rows: [
@@ -82,6 +92,10 @@ next_page: true,
 page: 1
 ```
 
+as long as there is more data to be fetched the property `next_page` will be true which means we can increase the `page` query param by one to fetch more data
+
+once the data is fully fetched the `next_page` will be `false` keep in mind that trying to fetch data by using a page number that does not have data will throw an `error`
+
 #### error:
 
 return data in the following format:
@@ -95,9 +109,9 @@ return data in the following format:
 
 expected **error_code**:
 
-SERVER_ERROR: something went wrong while trying to connect or fetching data from database
+SERVER_ERROR: something went wrong while trying to connect or fetching data from database **(expected status code 500)**
 
-RIDES_NOT_FOUND_ERROR: no record has been found when fetching data from database
+RIDES_NOT_FOUND_ERROR: no record has been found when fetching data from database **(expected status code 404)**
 
 ### get single ride:
 
@@ -115,7 +129,7 @@ request can contain two return data types:
 
 #### success:
 
-return **rows** that contains matching record where the "rideID" equal the ":id" in the following
+return **rows** that contains matching record where the "rideID" equal the ":id" in the following **(expected status code 200)**
 
 format:
 
@@ -148,9 +162,9 @@ return data in the following format:
 
 expected **error_code**:
 
-SERVER_ERROR: something went wrong while trying to connect or fetching data from database
+SERVER_ERROR: something went wrong while trying to connect or fetching data from database **(expected status code 500)**
 
-RIDES_NOT_FOUND_ERROR: no record has been found when fetching data from database
+RIDES_NOT_FOUND_ERROR: no record has been found when fetching data from database **(expected status code 404)**
 
 ### create new ride:
 
@@ -217,9 +231,9 @@ return data in the following format:
 
 expected **error_code**:
 
-SERVER_ERROR: something went wrong while trying to connect or fetching data from database
+SERVER_ERROR: something went wrong while trying to connect or fetching data from database **(expected status code 500)**
 
-VALIDATION_ERROR: one of the provided data is missing or has an invalid value
+VALIDATION_ERROR: one of the provided data is missing or has an invalid value **(expected status code 400)**
 
 ## Creating Documentation and rendering it in webview:
 
@@ -245,3 +259,26 @@ now any user who wants to modify the documentation can just go to the path
 `documentation/index.md`
 
 and start editing the content in it, and see it reflected into the browser
+
+## Running normal and load test:
+
+in the current project, once it is installed on your machine we have two kind of testing
+
+1. unit test
+2. load test
+
+in terms of unit test all you have to do is to run the code
+
+```json
+npm run test
+```
+
+this will run a test and hit all available test cases and return the result and the coverage code
+
+for the load testing you can run the load testing by running the following command
+
+```json
+npm run test:load
+```
+
+it will start the server and start load testing using **artillery** after the testing is finished a report will be generated and the server will be automaticall shutdown using the package **forever**

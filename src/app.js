@@ -49,8 +49,6 @@ module.exports = (db) => {
     }
 
     if (
-      !endLatitude ||
-      !endLongitude ||
       endLatitude < -90 ||
       endLatitude > 90 ||
       endLongitude < -180 ||
