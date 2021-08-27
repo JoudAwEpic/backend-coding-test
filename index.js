@@ -1,21 +1,18 @@
-/* eslint-disable import/no-unresolved */
-/* eslint-disable import/extensions */
-
 // express md to handle markup files
-import expressMd from "express-md";
+const expressMd = require("express-md");
 
 // import and init the sqlite3
-import * as sqlite3 from "sqlite3";
+const sqlite3 = require("sqlite3");
 
-import path from "path";
+const path = require("path");
 
 // initial the app requirement
-import application from "./src/app";
+const application = require("./src/app");
 
-import buildSchemas from "./src/schemas";
+const buildSchemas = require("./src/schemas");
 
 // implement winston
-import logger from "./utils/winston";
+const logger = require("./utils/winston");
 
 const port = 8010;
 

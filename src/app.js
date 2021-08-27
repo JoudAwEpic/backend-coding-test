@@ -1,23 +1,18 @@
-/* eslint-disable import/no-unresolved */
-/* eslint-disable import/extensions */
+const express = require("express");
 
-import express, { Application, Request, Response } from "express";
+const bodyParser = require("body-parser");
 
-import bodyParser from "body-parser";
-
-// import type of the database
-import { Database } from "sqlite3";
 // import winston logger
-import logger from "../utils/winston";
+const logger = require("../utils/winston");
 
 const app = express();
 
 const jsonParser = bodyParser.json();
 
-const application = (db: Database): Application => {
-  app.get("/health", (_req: Request, res: Response) => res.send("Healthy"));
+module.exports = (db) => {
+  app.get("/health", (req, res) => res.status(200).send("Healthy"));
 
-  app.post("/rides", jsonParser, (req: Request, res: Response) => {
+  app.post("/rides", jsonParser, (req, res) => {
     const startLatitude = Number(req.body.start_lat);
     const startLongitude = Number(req.body.start_long);
     const endLatitude = Number(req.body.end_lat);
@@ -103,23 +98,16 @@ const application = (db: Database): Application => {
       values,
       (err) => {
         if (err) {
-          logger.error("Unknown error");
           return res.status(500).send({
             error_code: "SERVER_ERROR",
             message: "Unknown error",
           });
         }
 
-        // define and fix the undefined with this
-
         return db.all(
-          "SELECT * FROM Rides WHERE rideID = ?",
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          this.lastId ?? 1,
+          "SELECT * FROM Rides ORDER BY rideID DESC LIMIT 1",
           (innerErr, rows) => {
             if (innerErr) {
-              logger.error("Unknown error");
               return res.status(500).send({
                 error_code: "SERVER_ERROR",
                 message: "Unknown error",
@@ -133,12 +121,14 @@ const application = (db: Database): Application => {
     );
   });
 
-  app.get("/rides", (req: Request, res: Response) => {
+  app.get("/rides", (req, res) => {
     const page = +req.query.page || 1;
     const limit = +req.query.limit || 5;
+    const limitStart = (page - 1) * limit;
+    const limitEnd = page * limit;
 
     db.all(
-      `SELECT * FROM Rides LIMIT '${limit}' OFFSET '${limit * page}'`,
+      `SELECT * FROM Rides LIMIT '${limitStart}','${limitEnd}'`,
       (err, rows) => {
         if (err) {
           logger.error("Unknown error");
@@ -158,7 +148,7 @@ const application = (db: Database): Application => {
 
         return db.all(
           "SELECT COUNT(rideID) AS countRides FROM Rides",
-          (innerErr, rides: unknown) => {
+          (innerErr, rides) => {
             if (innerErr) {
               logger.error("Unknown error");
               return res.status(500).send({
@@ -169,7 +159,7 @@ const application = (db: Database): Application => {
 
             const nextPage = page * limit < rides[0].countRides;
 
-            return res.send({
+            return res.status(200).send({
               rows,
               total_items: rides[0].countRides,
               next_page: nextPage,
@@ -181,7 +171,7 @@ const application = (db: Database): Application => {
     );
   });
 
-  app.get("/rides/:id", (req: Request, res: Response) => {
+  app.get("/rides/:id", (req, res) => {
     db.all(
       `SELECT * FROM Rides WHERE rideID='${req.params.id}'`,
       (err, rows) => {
@@ -201,12 +191,10 @@ const application = (db: Database): Application => {
           });
         }
 
-        return res.send(rows);
+        return res.status(200).send(rows);
       }
     );
   });
 
   return app;
 };
-
-export default application;

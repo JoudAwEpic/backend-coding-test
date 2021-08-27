@@ -1,6 +1,4 @@
-import { Database } from "sqlite3";
-
-const schemas = (db: Database): Database => {
+module.exports = (db) => {
   const createRideTableSchema = `
         CREATE TABLE Rides
         (
@@ -20,5 +18,3 @@ const schemas = (db: Database): Database => {
 
   return db;
 };
-
-export default schemas;

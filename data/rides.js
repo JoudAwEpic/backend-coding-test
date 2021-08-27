@@ -68,7 +68,7 @@ const ride = {
   driver_vehicle: "Marcedes",
 };
 
-export {
+module.exports = {
   ride,
   errorRiderName,
   errorDriverName,
