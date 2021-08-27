@@ -2,7 +2,7 @@
 const expressMd = require("express-md");
 
 // import and init the sqlite3
-const sqlite3 = require("sqlite3");
+const sqlite3 = require("sqlite3").verbose();
 
 const path = require("path");
 
@@ -16,7 +16,6 @@ const logger = require("./utils/winston");
 
 const port = 8010;
 
-sqlite3.verbose();
 const db = new sqlite3.Database(":memory:");
 
 db.serialize(() => {
