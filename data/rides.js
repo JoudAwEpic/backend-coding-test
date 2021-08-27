@@ -68,6 +68,16 @@ const ride = {
   driver_vehicle: "Marcedes",
 };
 
+const riderInjection = {
+  start_lat: 81.024,
+  start_long: 112.045,
+  end_lat: 83.5987742,
+  end_long: -124.221,
+  rider_name: "Jason Statment",
+  driver_name: "Michel Angelo",
+  driver_vehicle: "Marcedes; DROP TABLE Rides",
+};
+
 module.exports = {
   ride,
   errorRiderName,
@@ -76,4 +86,5 @@ module.exports = {
   errorStartLat,
   errorStartLong,
   errorEndLatitude,
+  riderInjection,
 };

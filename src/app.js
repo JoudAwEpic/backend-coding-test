@@ -11,9 +11,9 @@ const jsonParser = bodyParser.json();
 
 module.exports = (db) => {
   // function to allow us to run sqllite3 in async mode
-  async function dbAll(query) {
+  async function dbAll(query, values = []) {
     return new Promise((resolve, reject) => {
-      db.all(query, (err, rows) => {
+      db.all(query, values, (err, rows) => {
         if (err) {
           return reject(err);
         }
@@ -34,64 +34,63 @@ module.exports = (db) => {
     const driverVehicle = req.body.driver_vehicle;
 
     if (
+      !startLatitude ||
+      !startLongitude ||
       startLatitude < -90 ||
       startLatitude > 90 ||
       startLongitude < -180 ||
       startLongitude > 180
     ) {
-      logger.error(
-        "Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively"
-      );
+      const message =
+        "Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively";
+      logger.error(message);
       return res.status(400).send({
         error_code: "VALIDATION_ERROR",
-        message:
-          "Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively",
+        message,
       });
     }
 
     if (
+      !endLatitude ||
+      !endLongitude ||
       endLatitude < -90 ||
       endLatitude > 90 ||
       endLongitude < -180 ||
       endLongitude > 180
     ) {
-      logger.error(
-        "Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively"
-      );
+      const message =
+        "Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively";
+      logger.error(message);
       return res.status(400).send({
         error_code: "VALIDATION_ERROR",
-        message:
-          "End latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively",
+        message,
       });
     }
 
     if (typeof riderName !== "string" || riderName.length < 1) {
-      logger.error(
-        "Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively"
-      );
+      const message = "Rider name must be a non empty string";
+      logger.error(message);
       return res.status(400).send({
         error_code: "VALIDATION_ERROR",
-        message: "Rider name must be a non empty string",
+        message,
       });
     }
 
     if (typeof driverName !== "string" || driverName.length < 1) {
-      logger.error(
-        "Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively"
-      );
+      const message = "Driver name must be a non empty string";
+      logger.error(message);
       return res.status(400).send({
         error_code: "VALIDATION_ERROR",
-        message: "Rider name must be a non empty string",
+        message,
       });
     }
 
     if (typeof driverVehicle !== "string" || driverVehicle.length < 1) {
-      logger.error(
-        "Start latitude and longitude must be between -90 - 90 and -180 to 180 degrees respectively"
-      );
+      const message = "Driver Vehicle must be a non empty string";
+      logger.error(message);
       return res.status(400).send({
         error_code: "VALIDATION_ERROR",
-        message: "Rider name must be a non empty string",
+        message,
       });
     }
 
@@ -132,9 +131,10 @@ module.exports = (db) => {
     const limitEnd = page * limit;
 
     try {
-      const rows = await dbAll(
-        `SELECT * FROM Rides LIMIT '${limitStart}','${limitEnd}'`
-      );
+      const rows = await dbAll(`SELECT * FROM Rides LIMIT ?,?`, [
+        limitStart,
+        limitEnd,
+      ]);
       if (rows.length === 0) {
         logger.error("Could not find any rides");
         return res.status(500).send({
@@ -166,9 +166,18 @@ module.exports = (db) => {
 
   app.get("/rides/:id", async (req, res) => {
     try {
-      const result = await dbAll(
-        `SELECT * FROM Rides WHERE rideID='${req.params.id}'`
-      );
+      const { id } = req.params || null;
+
+      if (!id) {
+        const message = "Please provide a valide ID";
+        logger.error(message);
+        return res.status(500).send({
+          error_code: "RIDES_NOT_FOUND_ERROR",
+          message,
+        });
+      }
+
+      const result = await dbAll(`SELECT * FROM Rides WHERE rideID=?`, [id]);
 
       if (result.length === 0) {
         logger.error("Could not find any rides");

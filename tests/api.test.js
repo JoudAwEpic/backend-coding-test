@@ -18,6 +18,7 @@ const {
   errorStartLat,
   errorStartLong,
   errorEndLatitude,
+  riderInjection,
 } = require("../data/rides");
 
 describe("API tests", () => {
@@ -50,6 +51,9 @@ describe("API tests", () => {
 
       expect(firstPage.body.next_page).to.equal(true);
     });
+    it("works by giving default values when submitting wrong data", async () => {
+      await request(app).get(`/rides?page=test&limit=test`).expect(200);
+    });
   });
 
   describe("POST /rides", () => {
@@ -60,6 +64,16 @@ describe("API tests", () => {
         .expect("Content-Type", "application/json; charset=utf-8")
         .expect(200);
 
+      expect(result.body).to.have.lengthOf(1);
+    });
+    it("should work when submitting SQL Injection String", async () => {
+      const createdRecord = await request(app)
+        .post("/rides")
+        .send(riderInjection)
+        .expect(200);
+      const result = await request(app)
+        .get(`/rides/${createdRecord.body[0].rideID}`)
+        .expect(200);
       expect(result.body).to.have.lengthOf(1);
     });
     it("should throw an error when rider_name is missing", async () => {
