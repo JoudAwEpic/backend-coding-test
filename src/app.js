@@ -34,8 +34,6 @@ module.exports = (db) => {
     const driverVehicle = req.body.driver_vehicle;
 
     if (
-      !startLatitude ||
-      !startLongitude ||
       startLatitude < -90 ||
       startLatitude > 90 ||
       startLongitude < -180 ||
